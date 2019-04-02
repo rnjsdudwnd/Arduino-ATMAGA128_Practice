@@ -1,0 +1,34 @@
+int pin_LED[8]={13,12,11,10,9,8,7,6};
+
+void setup() {
+  // put your setup code here, to run once:
+  int i;
+  for(i=0; i<8;i++){
+    pinMode(pin_LED[i],OUTPUT);
+  }
+  Serial.begin(9600);
+  Serial.print("Enter o or x");
+  
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  char data;
+  int i;
+  if(Serial.available()>0){
+    data=Serial.read();
+    if(data=='x'){
+      for(i=0; i<8;i++)
+       {
+          digitalWrite(pin_LED[i],LOW);
+    
+       }
+    }else if(data=='o'){
+      for(i=0; i<8;i++)
+       {
+          digitalWrite(pin_LED[i],HIGH);
+       }
+    }
+  }
+
+}
