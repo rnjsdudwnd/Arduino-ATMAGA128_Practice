@@ -1,0 +1,40 @@
+void setup() {
+  // put your setup code here, to run once:
+  unsigned char bit=0xff;            //1111 1111
+  Serial.begin(9600);
+  Serial.println("3bit Clear");   
+  bit &=~(0x1<<3);                  //0000 0001 ->       0000 1000->       1111 0111 ->   1111 0111
+  Serial.println(bit,BIN);                                                                    //↕(compare)
+  Serial.println("7bit&4bit clear"); 
+  bit &=~((0x1<<6)|(0x1<<4));  //0100 0000, 0001 0000 ->(OR) 0101 0000 ->(Not)1010 1111 -> 1010 0111
+  Serial.println(bit,BIN);
+  Serial.println("6Bit set");                                                              //↕(compare)
+  bit |= (0x1<<6);              // 0000 0001 ->                   0100 0000 ->(OR)         1110 0111
+  Serial.println(bit,BIN);
+                                                                                          //↕(compare)
+  if(bit & (0x1<<5)){           // 0000 0001 -> 0010 0000 ->                               0010 0000
+    Serial.println("True");      //If the number is over 0000 0001, True  (1)
+  }
+  else{
+    Serial.println("False");     // If the number is over 0000 0000, False    (0)
+  }
+                                                                                           //↕(compare)
+  bit &(0x1<<3) ? Serial.println("3bit True"):Serial.println("3bit False"); // 0000 1000 -> 0000 0000(False)
+  // ? -> Ternary Operator
+  // If bit is True or False, the thing is gonna be right direction like True.
+  
+  bit ^= (0x1 <<4);           //0001 0000(Compare with 1110 0111 in 12 line)-> 1111 0111      
+  Serial.println(bit,BIN);    // If the num is incorrect, 1 .If the num is correct, 0.
+  Serial.println("4bit Invert 1");
+  bit ^= (0x1 <<4);           //0001 0000(Compare with 1110 0111 in 26 line) -> 1110 0111
+  Serial.println(bit, BIN);
+  Serial.println("4bit Invert 2");
+  
+  
+  
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+
+}
