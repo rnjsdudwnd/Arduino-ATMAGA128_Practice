@@ -1,0 +1,103 @@
+#define VCC 3
+//#define GND 4
+#define HIT 2 //substitution 2&3 must be required for Interrupt
+int pin_FND_DATA[8]={13,12,11,10,9,8,7,6};
+int pin_FND_SEL[2]={4,5};
+uint8_t FND_data[16] = {0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x27,
+ 0x7F, 0x6F, 0x77, 0x7C, 0x39, 0x5E, 0x79, 0x71};
+uint8_t FND_sel_data[2] = {0x3E, 0x3D};
+ 
+volatile int count =0;
+
+volatile int b=0;
+int c =0;
+
+void setup() {
+  // put your setup code here, to run once:
+  //Serial.begin(9600); Can't use with this timer
+  int i;
+  pinMode(VCC, OUTPUT);
+  pinMode(HIT, INPUT);
+  digitalWrite(VCC, HIGH);
+  
+  for(i=0; i<8; i++){
+    pinMode(pin_FND_DATA[i],OUTPUT);
+    
+  }
+  for(i=0; i<2; i++){
+    pinMode(pin_FND_SEL[i],OUTPUT);
+  }
+  attachInterrupt(digitalPinToInterrupt(HIT), HIT_ISR, FALLING);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  //Serial.print("Hit: ");
+  //Serial.println(count);
+  //delay(500);
+
+  int i,j;
+
+  FND_sel_out(FND_sel_data[0]);
+  FND_data_out(FND_data[count]);
+  delay(9);
+  FND_sel_out(FND_sel_data[1]);
+  FND_data_out(FND_data[b]);
+  delay(9);
+//  if(digitalRead(pic_SWITCH))
+//  {
+//    //a++;
+//    c = 1;
+//    Serial.print("Hit: ");
+//    Serial.println(count);
+//    delay(500);
+//  }
+//  if(c == 1 && !digitalRead(pic_SWITCH))
+//  {
+//    a++;
+//    c=0;
+//    
+//  }
+//  if(a==10)
+//  {
+//    a=0;
+//    b++;
+//    Serial.print("Hit: ");
+//    Serial.println(count);
+//     delay(500);
+//  }
+//  if(b == 10)
+//  {
+//    b=0;
+//  }
+//}
+}
+
+void HIT_ISR(void){
+  count++;
+  if(count==10){
+    count=0;
+    b++;
+  }
+  if(b==10)
+  {
+    b=0;
+  }
+
+
+  
+}
+
+void FND_data_out(uint8_t data){
+  int i;
+  for(i=0; i<8; i++){
+    digitalWrite(pin_FND_DATA[i],(data>>i)&0x1);
+  }
+}
+void FND_sel_out(uint8_t data){
+  int i;
+  for(i=0; i<6; i++){
+    digitalWrite(pin_FND_SEL[i], (data>>i)& 0x1);
+    
+  }
+}
