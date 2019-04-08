@@ -1,0 +1,41 @@
+ int pin_GND = A0; // Ground pin
+ int pin_VCC = A1; // Power pin
+ int pin_CDS = A2; // Cds pin
+ int pin_LED[8]={13,12,11,10,9,8,7,6};
+void setup() {
+  // put your setup code here, to run once:
+  
+  pinMode(pin_GND, OUTPUT);
+  pinMode(pin_VCC, OUTPUT);
+  pinMode(pin_CDS,INPUT);
+  digitalWrite(pin_GND, LOW);
+  digitalWrite(pin_VCC,HIGH);
+  Serial.begin(9600);
+  int i;
+  for(i=0; i<8;i++){
+    pinMode(pin_LED[i],OUTPUT);
+  }
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  int adc_data = analogRead(pin_CDS);
+  int i;
+ Serial.print("CDS : ");
+ Serial.println(adc_data);
+ delay(500); 
+ for(int i=0; i<8;i++){
+  digitalWrite(pin_LED[i],LOW);
+ }
+ 
+ if(adc_data>100){
+    for(i=0; i<8;i++){
+    digitalWrite(pin_LED[i], HIGH);  // LED ON
+    delay(50); // 1초 지연
+    }  }
+   else if(adc_data<=100){
+    for(i=0; i<8; i++){
+    digitalWrite(pin_LED[i], LOW); // LED OFF
+    delay(50); // 1초 지연
+   } }
+}
