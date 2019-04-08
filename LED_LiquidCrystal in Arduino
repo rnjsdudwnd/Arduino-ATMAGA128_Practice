@@ -1,0 +1,41 @@
+#include <LiquidCrystal.h>
+int pin_LCD_CTRL[3] = {13, 12, 11}; // RS, RW, E
+int pin_LCD_DATA[8] = {10, 9, 8, 7, 6, 5, 4, 3}; // D0 ~ D7
+// rs, rw, e d0, d1, d2, d3, d4, d5, d6, d7
+LiquidCrystal lcd(13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3);
+char data=0;
+void setup() {
+  // put your setup code here, to run once:
+ 
+  lcd.begin(16, 2); // set up the LCD‟s number of columns and rows
+  Serial.begin(9600);
+  
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+ /* 
+  if(Serial.available()>0){
+    
+    data=Serial.read();
+    if(data != '\n'){   // For erasing /n in char
+      lcd.print(data);
+      
+    }
+    if(data== 94){ //^ ASCII character number
+      lcd.clear();
+    }
+  }
+*/
+  String buffer;
+  if(Serial.available()>0){
+    buffer = Serial.readString();
+  }
+  if(buffer !=""){
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print(buffer);
+  }
+  
+ 
+}
