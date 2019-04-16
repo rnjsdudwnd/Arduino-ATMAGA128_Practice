@@ -1,0 +1,34 @@
+#include <avr/io.h>
+#include <avr/interrupt.h>
+volatile unsigned char LED_Data=0x00;
+unsigned char timer0Cnt=0;
+ISR(TIMER0_OVF_vect);
+int main(void)
+{
+    /* Replace with your application code */
+    DDRC=0x0F;
+	TCCR0=0x07; //0000 0111 CSn2, CSn1, Csn0, 1024분주.
+	TCNT0=112; // 0-255 internal. 256-144=112, 카운터레지스터 초기값이 112부터
+	//14745600/1024=14.4KHz, 14400*0.01=144=>256-144=112 
+	TIMSK=0x01; // TOIE0 타이머 0번에 오버플로우 입력
+	TIFR |=1 <<TOV0; //타이머 카운트 0또는 2에서 오버플로우 발생하면 비트가 1로생성(0x01)
+	//0번비트에 1을 넣는다.Or 넣으면 클리어시킨다.
+	sei();
+	while (1) 
+    {
+		PORTC=LED_Data;
+    }
+}
+ISR(TIMER0_OVF_vect){
+	cli();
+	TCNT0=112; //타이머카운터초기화
+	timer0Cnt++;//계속 증가해서 100이되면...0.01초를 1초로
+	if(timer0Cnt ==100){//1초가 되면
+		LED_Data++;//From 0x00 to 0x0f
+		if(LED_Data>0x0F) LED_Data=0; //0x0F가 되면 초기화
+		timer0Cnt=0;// 카운터도 초기화
+		
+	}
+	sei();
+}
+
