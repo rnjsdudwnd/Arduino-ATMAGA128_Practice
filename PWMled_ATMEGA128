@@ -1,0 +1,24 @@
+#include <avr/io.h>
+#include <util/delay.h>
+
+int main(void)
+{
+    /* Replace with your application code */
+	unsigned char Light=0;
+	DDRB =0x10; //PB4 output
+	TCCR0=0x77;	// 0111 0111 ->setting PWM,phase correct, Set OCn on compare match
+	TCNT0=0x00;
+	
+	
+    while (1) 
+    {
+		for(Light=0; Light<255; Light++){
+			OCR0=Light;
+			_delay_ms(50);
+		}
+		for(Light=255; 0<Light; Light--){
+			OCR0=Light;
+			_delay_ms(50);
+		}
+    }
+}
