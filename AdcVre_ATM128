@@ -1,0 +1,37 @@
+#include <avr/io.h>
+#include <util/delay.h>
+#include "lcd.h"
+void printf_2dot1(uint16_t _temp);
+
+int main(void)
+{
+    unsigned int AdData=0;
+	float v_temp;
+	lcdInit();
+	
+	ADMUX =0x01;
+	ADCSRA = 0x87;
+	
+    while (1) 
+    {
+		ADCSRA |= 0x40;
+		while((ADCSRA &0x10) == 0x00);
+		AdData=ADC; //Value of Digital
+		
+		v_temp = (float) AdData *33/1023;
+		printf_2dot1(v_temp);
+		_delay_ms(500);
+    }
+}
+void printf_2dot1(uint16_t _temp){
+	uint8_t s100, s10;
+	lcdGotoXY(0,0);
+	lcdPrintData(" Vres: ",7);
+	s100 =_temp/100;
+	if(s100>0) lcdDataWrite(s100+'0');
+	s10 = _temp%100;
+	lcdDataWrite((s10/10 +'0'));
+	lcdPrintData(".",1);
+	lcdDataWrite((s10%10)+'0');
+	lcdDataWrite('V');
+}
