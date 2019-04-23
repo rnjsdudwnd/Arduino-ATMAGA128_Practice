@@ -1,0 +1,90 @@
+/*
+1.master가 slave data
+start-> transmit(adress)->transmit(byte 횟수대로)->stop
+2.master가 slaver의 값을 read
+start->transmit->receive_ack(처음, 마지막전 byte 수신)
+=>receive_nack(마지막 바이트 전송)=>stop
+
+
+#define 12C_CSL PD0
+#define 12c_SDA PD1
+void 12C_start(void){
+	//TWCR의 TWINT, TWSTA, TWEN 비트를 세팅하여 START Condition을 내보냄
+	TWCR=_BV(TWINT)|_BV(TWSTA)|_BV(TWEN);
+	//TWCR의 START Condition이 정상적으로 출력되어 TWINT 플래그가 세팅 되길 기다림
+	while(!(TWCR&(0x01<<TWINT)));//1000 0000, 0이면 참이기 때문에 계속 돈다
+}
+void 12C_stop(void){
+	TWCR=_BV(TWINT)|_BV(TWSTO)|_BV(TWEN);//7 4 2
+}
+void 12C_transmit(uint8_t data){
+	TWDR=data;
+	TWCR=_BV(TWINT)|_BV(TWEA)|_BV(TWEN);
+	while(!(TWCR&(0x1<<TWINT)));
+}
+uint8_t 12C_receive_ack(void){
+	TWCR=_BV(TWINT)|_BV(TWEA)|_BV(TWEN); //인터럽트비트,ack처리,enable처리
+	while(!(TWCR&(0x1<<TWINT)));
+	return TWDR;
+}
+uint8_t 12C_receive_nack(void){ //nonACK
+	TWCR=_BV(TWINT)|_BV(TWEN); //인터럽트비트,enable처리
+	while(!(TWCR&(0x1<<TWINT)));
+	return TWDR;
+}
+*/
+
+#include <avr/io.h>
+#include <util/delay.h>
+#include "TWI_driver.h"
+#include "SHT2x.h"
+#include "lcd.h"
+void printf_2dot1(uint8_t sense, uint16_t sense_temp);
+uint16_t temperatureC, humidityRH;
+int main(void)
+{
+	uint8_t error=0;
+	nt16 sRH;
+	nt16 sT;
+	
+	Init_TWI();
+	lcdInit();
+	SHT2x_Init();
+    while (1) 
+    {
+		error |= SHT2x_MeasureHM(HUMIDITY, &sRH);
+		error |= SHT2x_MeasureHM(TEMP, &sT);
+		temperatureC = SHT2x_CalcTemperatureC(sT.u16)*10;
+		humidityRH = SHT2x_CalcRH(sRH.u16)*10;
+		if(error ==SUCCESS){
+			lcdGotoXY(0,0);
+			printf_2dot1(TEMP, temperatureC);
+			lcdGotoXY(0,1);
+			printf_2dot1(HUMIDITY,humidityRH);
+		
+		}
+		else{
+			lcdGotoXY(0,0);
+			lcdPrintData(" Temp: --.-C",12);
+			lcdGotoXY(0,1);
+			lcdPrintData(" Humi: --.-%",12);
+			
+		}
+		_delay_ms(300);
+    }
+}
+void printf_2dot1(uint8_t sense, uint16_t sense_temp){
+	uint8_t s100, s10;
+	if(sense ==TEMP) lcdPrintData(" Temp: ",7);
+	else if(sense ==HUMIDITY) lcdPrintData(" Humi: ",7);
+	s100=sense_temp/100;
+	if(s100>0) lcdDataWrite(s100+'0');
+	else lcdPrintData(" ",1);
+	s10= sense_temp%100;
+	lcdDataWrite((s10/10)+'0');
+	lcdPrintData(".",1);
+	lcdDataWrite((s10%10)+'0');
+	if(sense==TEMP) lcdDataWrite('C');
+	else if(sense==HUMIDITY) lcdDataWrite('%');
+}
+
